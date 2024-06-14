@@ -1,21 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import queryKimi from "./queryKimi";
 export default function History() {
   const [words, setWords] = useState([]);
   const [def, setDef] = useState();
   const [index, setIndex] = useState();
-  const [ai, setAi] = useState();
-  useEffect(() => {
-    let mounted=true;
-    window.model.createTextSession().then((ai) => {
-      if(mounted)setAi(ai);}).catch(error => console.log(error))
-    
-    return ()=>{
-      mounted=false;
-    }
-  }, []);
+  const [current, setCurrent] = useState();
+  const [ai,setAi]=useState();
+  useEffect(()=>
+  {
+    window.model.createTextSession().then(setAi).catch(error=>console.log(error))
+  },[]);
 
   useEffect(() => {
     fetch("http://localhost:8787/fetch")
@@ -29,34 +24,15 @@ export default function History() {
       .catch((error) => console.log(error));
   }, []);
   useEffect(() => {
-    /*
+    setCurrent(words[index]);
     if(ai){
       console.log(`running ${words[index].word}`);      
       ai.prompt(`provide the definition of the word '${words[index].word}'`)
       .then((data) => {setDef(data);console.log("done")})
       .catch(error=>console.log(error));
     }
-    */
-    async function queryWord(ai, word) {
-      if (ai) {
-        //const res = await ai.prompt(`provide the definition of the word '${word.word}'`);
-        //const res = await ai.prompt(`hello`);
-        const res=await queryKimi(word);
-        setDef(res);
-
-      }
-      else{
-
-        setDef("ai not initialized ");
-      }
-    }
-    if (words.length == 0) {
-      return
-    }
-    queryWord(ai, words[index]);
-  }, [index, ai]);
-  const nextWord = (event) => setIndex(index + 1);
-  const current = words ? words[index] : undefined;
+  }, [index]);
+  const nextWord=(event)=>setIndex(index+1);
 
   return !current ? (
     <h1>loading</h1>
@@ -68,4 +44,3 @@ export default function History() {
     </>
   );
 }
-
