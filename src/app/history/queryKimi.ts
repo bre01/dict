@@ -1,11 +1,11 @@
 import {Word} from "./types/word"
-import kimiKey from "../../../.dev.kimi"
+import kimiKey from "../../../.dev.kimi";
 /**
  * Takes a word and return their definition and usage to show as markdown string
  * @param word word to query
  * @returns defnition and usage 
  */
-export default async function queryKimi(word:Word):Promise<string>{
+export  async function queryKimi(word:Word):Promise<string>{
   const res=await fetch("http://localhost:8000/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -27,4 +27,12 @@ export default async function queryKimi(word:Word):Promise<string>{
   const js=await res.json()
   return js.choices[0].message.content;
 
+}
+export default async  function fakeKimi(word:Word):Promise<string>{
+  const def=await  promisfiedKimi(word,1000);
+  return def;
+
+}
+function promisfiedKimi(word:Word,ms:number):Promise<string>{
+  return new Promise(resolve=>setTimeout(()=>resolve(`**${word.word}** defnition here haha,**usage** haha`),ms))
 }

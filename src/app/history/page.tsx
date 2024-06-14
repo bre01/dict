@@ -7,10 +7,9 @@ import { Word } from "./types/word"
 import { useImmer } from "use-immer";
 import { produce } from "immer";
 export default function History() {
-  const [words, setWords] = useImmer<Word[] | []>([]);
-  const [def, setDef] = useState();
-  const [index, setIndex] = useState(0);
-  const [anwsers, SetAnwsers] = useState([]);
+  const [words, setWords] = useState<Word[] | []>([]);
+  const [index, setIndex] = useState();
+  const [anwsers, setAnwsers] = useState([]);
   const [currentGroup, setCurrentGroup] = useState(0);
 
 
@@ -20,7 +19,7 @@ export default function History() {
       .then((data: Word[]) => {
         console.log(data);
         setWords(data);
-        setIndex(10);
+        setIndex(0);
         console.log("fetched");
       })
       .catch((error) => console.log(error));
@@ -44,20 +43,41 @@ export default function History() {
   }, [index]);
   useEffect(() => {
 
-    async function updateWords(group, words: Word[], setWords, queryKimi) {
-      const updatedWords = await produce(words, async draft => {
-        for (let i = group; i < (group + 1) * 10; i++) {
-          if (i < words.length) {
-            const def = await queryKimi(words[i]);
-            draft[i].answer = def;
+    const prepareAnswer = async (group: number) => {
+      //await updateWords(group, words, setWords, queryKimi);
+      let lowRange;
+      let highRange;
+      if (group == 0) {
+        const firstWord = words[0];
+        firstWord.answer = await queryKimi(words[0])
+        const newWords = words.map((word, index) => {
+          if (index == 0) {
+            return firstWord;
           }
-        }
-      });
+          else {
+            return word
+          }
+        })
+        setWords(newWords)
+        lowRange = 1;
+        highRange = 10;
+      }
+      else {
+        lowRange = group*10;
+        highRange = (group+1)*10;
 
-      setWords(updatedWords);
-    }
-    const prepareAnswer = async (group) => {
-      await updateWords(group, words, setWords, queryKimi);
+      }
+      const newWords = await Promise.all(words.map(async (word, index) => {
+        if (index >= lowRange && index < highRange) {
+          const answer = await queryKimi(word);
+          return { ...word, answer };
+        }
+        else {
+          return word;
+        }
+
+      }))
+      setWords(newWords)
     };
 
 
@@ -81,7 +101,8 @@ export default function History() {
 
 
   const nextWord = () => setIndex(index + 1);
-  const current = words ? words[index] : undefined;
+  const current = words ? words[index] : "loading";
+  const def = (words[index] && words[index].answer) ? words[index].answer : "loading";
 
   return !current ? (
     <h1>loading</h1>
