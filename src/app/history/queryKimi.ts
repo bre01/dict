@@ -6,7 +6,7 @@ import kimiKey from "../../../.dev.kimi";
  * @param word word to query
  * @returns defnition and usage 
  */
-export  async function queryKimi(word:Word):Promise<string>{
+export  default async function queryKimi(word:Word):Promise<string>{
   const res=await fetch("http://localhost:8000/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -29,7 +29,7 @@ export  async function queryKimi(word:Word):Promise<string>{
   return js.choices[0].message.content;
 
 }
-export  default async  function fakeKimi(word:Word):Promise<string>{
+export   async  function fakeKimi(word:Word):Promise<string>{
   const def=await  promisfiedKimi(word,1000);
   return def;
 
