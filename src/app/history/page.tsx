@@ -2,25 +2,22 @@
 
 import { useEffect, useState } from "react";
 import queryKimi from "./queryKimi";
+import Markdown from 'react-markdown'
+import { Word } from "./types/word"
+import { useImmer } from "use-immer";
+import { produce } from "immer";
 export default function History() {
-  const [words, setWords] = useState([]);
+  const [words, setWords] = useImmer<Word[] | []>([]);
   const [def, setDef] = useState();
-  const [index, setIndex] = useState();
-  const [ai, setAi] = useState();
-  useEffect(() => {
-    let mounted=true;
-    window.model.createTextSession().then((ai) => {
-      if(mounted)setAi(ai);}).catch(error => console.log(error))
-    
-    return ()=>{
-      mounted=false;
-    }
-  }, []);
+  const [index, setIndex] = useState(0);
+  const [anwsers, SetAnwsers] = useState([]);
+  const [currentGroup, setCurrentGroup] = useState(0);
+
 
   useEffect(() => {
     fetch("http://localhost:8787/fetch")
       .then((data) => data.json())
-      .then((data) => {
+      .then((data: Word[]) => {
         console.log(data);
         setWords(data);
         setIndex(10);
@@ -37,25 +34,53 @@ export default function History() {
       .catch(error=>console.log(error));
     }
     */
-    async function queryWord(ai, word) {
-      if (ai) {
-        //const res = await ai.prompt(`provide the definition of the word '${word.word}'`);
-        //const res = await ai.prompt(`hello`);
-        const res=await queryKimi(word);
-        setDef(res);
 
-      }
-      else{
+    function updateGroup(index: number) {
+      const currentGroup = Math.round(index / 10);
+      setCurrentGroup(currentGroup);
+    }
 
-        setDef("ai not initialized ");
+    updateGroup(index);
+  }, [index]);
+  useEffect(() => {
+
+    async function updateWords(group, words: Word[], setWords, queryKimi) {
+      const updatedWords = await produce(words, async draft => {
+        for (let i = group; i < (group + 1) * 10; i++) {
+          if (i < words.length) {
+            const def = await queryKimi(words[i]);
+            draft[i].answer = def;
+          }
+        }
+      });
+
+      setWords(updatedWords);
+    }
+    const prepareAnswer = async (group) => {
+      await updateWords(group, words, setWords, queryKimi);
+    };
+
+
+
+
+
+    if (words.length != 0) {
+      if (currentGroup == 0) {
+        prepareAnswer(0);
+        prepareAnswer(1);
       }
+      else {
+        prepareAnswer(currentGroup + 1)
+      }
+
     }
-    if (words.length == 0) {
-      return
-    }
-    queryWord(ai, words[index]);
-  }, [index, ai]);
-  const nextWord = (event) => setIndex(index + 1);
+
+
+  }, [currentGroup])
+
+
+
+  const nextWord = () => setIndex(index + 1);
   const current = words ? words[index] : undefined;
 
   return !current ? (
@@ -63,7 +88,7 @@ export default function History() {
   ) : (
     <>
       <h1>{current.word}</h1>
-      <h2>{def}</h2>
+      <Markdown>{def}</Markdown>
       <button onClick={nextWord}>next word</button>
     </>
   );

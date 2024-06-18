@@ -6,6 +6,7 @@ export default async function queryKimi(word){
         },
         "body": `{\n  \"model\": \"kimi\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"provide the definition of ${word.word},provide common usage and usage in computer science, and make a sentence for me to remember it \"\n    }\n  ],\n  \"use_search\": true,\n  \"stream\": false\n}`
   })
-  return res;
+  const js=await res.json()
+  return js.choices[0].message.content;
 
 }
