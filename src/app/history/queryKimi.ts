@@ -29,7 +29,7 @@ export  async function queryKimi(word:Word):Promise<string>{
   return js.choices[0].message.content;
 
 }
-export default async  function fakeKimi(word:Word):Promise<string>{
+export  default async  function fakeKimi(word:Word):Promise<string>{
   const def=await  promisfiedKimi(word,1000);
   return def;
 
