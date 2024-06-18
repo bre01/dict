@@ -43,15 +43,16 @@ export default function History() {
     updateGroup(index);
   }, [index]);
   useEffect(() => {
+    let localwords=words;
 
     const prepareAnswer = async (group: number) => {
       //await updateWords(group, words, setWords, queryKimi);
       let lowRange;
       let highRange;
       if (group == 0) {
-        const firstWord = words[0];
-        firstWord.answer = await queryKimi(words[0])
-        const newWords = words.map((word, index) => {
+        const firstWord = localwords[0];
+        firstWord.answer = await queryKimi(localwords[0])
+        const newWords = localwords.map((word, index) => {
           if (index == 0) {
             return firstWord;
           }
@@ -59,6 +60,7 @@ export default function History() {
             return word
           }
         })
+        localwords=newWords;
         setWords(newWords)
         lowRange = 1;
         highRange = 10;
@@ -68,7 +70,7 @@ export default function History() {
         highRange = (group+1)*10;
 
       }
-      const newWords = await Promise.all(words.map(async (word, index) => {
+      const newWords = await Promise.all(localwords.map(async (word, index) => {
         if (index >= lowRange && index < highRange) {
           const answer = await queryKimi(word);
           return { ...word, answer };
@@ -78,9 +80,12 @@ export default function History() {
         }
 
       }))
+      localwords=newWords;
       setWords(newWords)
+      if(group==0){
+        prepareAnswer(1);
+      }
     };
-
 
 
 
@@ -88,7 +93,6 @@ export default function History() {
     if (words.length != 0) {
       if (currentGroup == 0) {
         prepareAnswer(0);
-        prepareAnswer(1);
       }
       else {
         prepareAnswer(currentGroup + 1)
