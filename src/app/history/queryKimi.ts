@@ -1,4 +1,5 @@
 import {Word} from "./types/word"
+// @ts-ignore: env file not included in github repo for condidential 
 import kimiKey from "../../../.dev.kimi";
 /**
  * Takes a word and return their definition and usage to show as markdown string

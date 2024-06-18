@@ -8,7 +8,7 @@ import { useImmer } from "use-immer";
 import { produce } from "immer";
 export default function History() {
   const [words, setWords] = useState<Word[] | []>([]);
-  const [index, setIndex] = useState();
+  const [index, setIndex] = useState<number>(0);
   const [anwsers, setAnwsers] = useState([]);
   const [currentGroup, setCurrentGroup] = useState(0);
 
@@ -40,10 +40,10 @@ export default function History() {
       setCurrentGroup(currentGroup);
     }
 
-    updateGroup(index);
+    updateGroup(index as number);
   }, [index]);
   useEffect(() => {
-    let localwords=words;
+    let localwords = words;
 
     const prepareAnswer = async (group: number) => {
       //await updateWords(group, words, setWords, queryKimi);
@@ -60,14 +60,14 @@ export default function History() {
             return word
           }
         })
-        localwords=newWords;
+        localwords = newWords;
         setWords(newWords)
         lowRange = 1;
         highRange = 10;
       }
       else {
-        lowRange = group*10;
-        highRange = (group+1)*10;
+        lowRange = group * 10;
+        highRange = (group + 1) * 10;
 
       }
       const newWords = await Promise.all(localwords.map(async (word, index) => {
@@ -80,9 +80,9 @@ export default function History() {
         }
 
       }))
-      localwords=newWords;
+      localwords = newWords;
       setWords(newWords)
-      if(group==0){
+      if (group == 0) {
         prepareAnswer(1);
       }
     };
@@ -101,7 +101,7 @@ export default function History() {
     }
 
 
-  }, [currentGroup])
+  }, [currentGroup,words])
 
 
 
@@ -109,14 +109,17 @@ export default function History() {
   const current = words ? words[index] : "loading";
   const def = (words[index] && words[index].answer) ? words[index].answer : "loading";
 
-  return !current ? (
-    <h1>loading</h1>
-  ) : (
-    <>
-      <h1>{current.word}</h1>
-      <Markdown>{def}</Markdown>
-      <button onClick={nextWord}>next word</button>
-    </>
-  );
+  return words.length == 0 ?
+    (
+      <h1>loading</h1>
+    )
+    :
+    (
+      <>
+        <h1>{(current as Word).word}</h1>
+        <Markdown>{def}</Markdown>
+        <button onClick={nextWord}>next word</button>
+      </>
+    );
 }
 
