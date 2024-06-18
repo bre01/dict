@@ -8,7 +8,7 @@ import { useImmer } from "use-immer";
 import { produce } from "immer";
 export default function History() {
   const [words, setWords] = useState<Word[] | []>([]);
-  const [index, setIndex] = useState<number>(0);
+  const [index, setIndex] = useState<number>(-1);
   const [anwsers, setAnwsers] = useState([]);
   const [currentGroup, setCurrentGroup] = useState(0);
 
@@ -100,8 +100,9 @@ export default function History() {
 
     }
 
-
-  }, [currentGroup,words])
+  //this logic is complex and i know what i'm i doing
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentGroup])
 
 
 
