@@ -14,7 +14,8 @@ export default function History() {
 
 
   useEffect(() => {
-    fetch("http://localhost:8787/fetch")
+    //fetch("http://localhost:8787/fetch")
+    fetch("/fetch.json")
       .then((data) => data.json())
       .then((data: Word[]) => {
         console.log(data);
