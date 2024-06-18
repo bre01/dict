@@ -6,6 +6,7 @@ import Markdown from 'react-markdown'
 import { Word } from "./types/word"
 import { useImmer } from "use-immer";
 import { produce } from "immer";
+import Definition from "./Definition";
 export default function History() {
   const [words, setWords] = useState<Word[] | []>([]);
   const [index, setIndex] = useState<number>(-1);
@@ -118,6 +119,7 @@ export default function History() {
     (
       <>
         <h1>{(current as Word).word}</h1>
+        <Definition words={words} index={index}/>
         <Markdown>{def}</Markdown>
         <button onClick={nextWord}>next word</button>
       </>
